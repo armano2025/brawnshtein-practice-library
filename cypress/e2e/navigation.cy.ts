@@ -1,0 +1,26 @@
+/* global cy, describe, it */
+
+describe("Brawnshtein Practice Library navigation", () => {
+  beforeEach(() => {
+    cy.visit("/");
+  });
+
+  it("navigates from the home page to mathematics", () => {
+    cy.contains("a", "מתמטיקה").click();
+    cy.location("pathname").should("equal", "/mathematics");
+    cy.contains("h1", "מתמטיקה").should("be.visible");
+  });
+
+  it("opens a Hebrew search result", () => {
+    cy.get("#practice-search").type("לוח הכפל");
+    cy.contains("a", "לוח הכפל — תרגול מדורג").click();
+    cy.location("pathname").should("equal", "/worksheet/grade-3-multiplication-table");
+  });
+
+  it("keeps the home page usable on a mobile viewport", () => {
+    cy.viewport("iphone-x");
+    cy.contains("h1", "מאגר תרגילי בראונשטיין").should("be.visible");
+    cy.get("#practice-search").should("be.visible");
+    cy.contains("a", "מתמטיקה").should("be.visible");
+  });
+});
