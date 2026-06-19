@@ -6,6 +6,7 @@ import type { Grade } from "../models/Grade";
 import type { Subject } from "../models/Subject";
 import type { Topic } from "../models/Topic";
 import type { Worksheet } from "../models/Worksheet";
+import type { SearchCatalog } from "../models/Search";
 import { gradeRepository } from "../repositories/firestore/gradeRepository";
 import { subjectRepository } from "../repositories/firestore/subjectRepository";
 import { topicRepository } from "../repositories/firestore/topicRepository";
@@ -67,6 +68,42 @@ async function getWorksheetBySlug(slug: string): Promise<Worksheet | null> {
   return worksheetRepository.getBySlug(slug);
 }
 
+let searchCatalogRequest: Promise<SearchCatalog> | null = null;
+
+function getSearchCatalog(): Promise<SearchCatalog> {
+  if (!searchCatalogRequest) {
+    searchCatalogRequest = (async () => {
+      if (isDemoDataEnabled) {
+        return {
+          subjects: activeByOrder(demoSubjects),
+          grades: activeByOrder(mathematicsCategories),
+          topics: activeByOrder(mathematicsTopics),
+          worksheets: mathematicsWorksheets.filter((worksheet) => worksheet.isActive),
+        };
+      }
+
+      const [subjects, grades, topics, worksheets] = await Promise.all([
+        subjectRepository.getAll(),
+        gradeRepository.getAll(),
+        topicRepository.getAll(),
+        worksheetRepository.getAll(),
+      ]);
+
+      return {
+        subjects: activeByOrder(subjects),
+        grades: activeByOrder(grades),
+        topics: activeByOrder(topics),
+        worksheets: worksheets.filter((worksheet) => worksheet.isActive),
+      };
+    })().catch((error: unknown) => {
+      searchCatalogRequest = null;
+      throw error;
+    });
+  }
+
+  return searchCatalogRequest;
+}
+
 export const catalogService = {
   getSubjects,
   getGrades,
@@ -75,4 +112,5 @@ export const catalogService = {
   getTopicBySlug,
   getWorksheetsByTopicSlug,
   getWorksheetBySlug,
+  getSearchCatalog,
 };
