@@ -2,6 +2,11 @@ import type { SearchCatalog, SearchResult } from "../models/Search";
 
 const MAX_RESULTS = 10;
 
+export interface SearchHighlightSegment {
+  text: string;
+  isMatch: boolean;
+}
+
 export function normalizeSearchText(value: string): string {
   return value
     .toLocaleLowerCase("he")
@@ -11,6 +16,30 @@ export function normalizeSearchText(value: string): string {
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim()
     .replace(/\s+/g, " ");
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function getSearchHighlightSegments(value: string, rawQuery: string): SearchHighlightSegment[] {
+  const tokens = [...new Set(normalizeSearchText(rawQuery).split(" ").filter(Boolean))]
+    .sort((first, second) => second.length - first.length);
+
+  if (!value || !tokens.length) {
+    return value ? [{ text: value, isMatch: false }] : [];
+  }
+
+  const tokenSet = new Set(tokens);
+  const matchPattern = new RegExp(`(${tokens.map(escapeRegExp).join("|")})`, "giu");
+
+  return value
+    .split(matchPattern)
+    .filter(Boolean)
+    .map((text) => ({
+      text,
+      isMatch: tokenSet.has(normalizeSearchText(text)),
+    }));
 }
 
 function scoreMatch(query: string, searchableText: string, title: string): number {

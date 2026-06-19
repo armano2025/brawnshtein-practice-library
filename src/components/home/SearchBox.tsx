@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { SearchCatalog, SearchResultType } from "../../models/Search";
 import { catalogService } from "../../services/catalogService";
-import { searchCatalog } from "../../utils/searchCatalog";
+import { getSearchHighlightSegments, searchCatalog } from "../../utils/searchCatalog";
 
 const resultTypeLabels: Record<SearchResultType, string> = {
   subject: "מקצוע",
@@ -10,6 +10,19 @@ const resultTypeLabels: Record<SearchResultType, string> = {
   topic: "נושא",
   worksheet: "תרגול",
 };
+
+interface HighlightedTextProps {
+  text: string;
+  query: string;
+}
+
+function HighlightedText({ text, query }: HighlightedTextProps) {
+  return getSearchHighlightSegments(text, query).map((segment, index) => (
+    segment.isMatch ? (
+      <mark className="search-highlight" key={`${segment.text}-${index}`}>{segment.text}</mark>
+    ) : segment.text
+  ));
+}
 
 export function SearchBox() {
   const navigate = useNavigate();
@@ -97,8 +110,8 @@ export function SearchBox() {
                     <Link to={result.path} onClick={() => setIsOpen(false)}>
                       <span className="search-result-type">{resultTypeLabels[result.type]}</span>
                       <span className="search-result-content">
-                        <strong>{result.title}</strong>
-                        <small>{result.description}</small>
+                        <strong><HighlightedText text={result.title} query={query} /></strong>
+                        <small><HighlightedText text={result.description} query={query} /></small>
                       </span>
                       <span className="search-result-arrow" aria-hidden="true">←</span>
                     </Link>

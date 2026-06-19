@@ -13,7 +13,9 @@ describe("Brawnshtein Practice Library navigation", () => {
 
   it("opens a Hebrew search result", () => {
     cy.get("#practice-search").type("לוח הכפל");
-    cy.contains("a", "לוח הכפל — תרגול מדורג").click();
+    cy.get(".search-results li").first().as("firstSearchResult");
+    cy.get("@firstSearchResult").find("mark.search-highlight").should("have.length", 2);
+    cy.get("@firstSearchResult").should("contain.text", "לוח הכפל").find("a").click();
     cy.location("pathname").should("equal", "/worksheet/grade-3-multiplication-table");
   });
 
