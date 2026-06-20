@@ -32,11 +32,17 @@ jobs:
       - name: Unit tests
         run: pnpm test:search
 
-      - name: Install Cypress binary
-        uses: cypress-io/github-action@v6
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
         with:
-          install-command: pnpm install --frozen-lockfile
-          runTests: false
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Cypress binary
+        run: pnpm exec cypress install
+
+      - name: Verify Cypress binary
+        run: pnpm exec cypress verify
 
       - name: Build
         env:

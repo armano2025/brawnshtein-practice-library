@@ -8,8 +8,10 @@
     "build": "tsc -p tsconfig.app.json --noEmit && vite build --configLoader runner",
     "preview": "vite preview --configLoader runner",
     "lint": "eslint . --max-warnings 0",
+    "test": "tsx scripts/testSearch.ts",
     "test:search": "tsx scripts/testSearch.ts",
     "cy:run": "cypress run --e2e",
+    "cypress:run": "cypress run --e2e",
     "seed": "tsx scripts/seedFirestore.ts",
     "seed:dry-run": "tsx scripts/seedFirestore.ts --dry-run"
   },
