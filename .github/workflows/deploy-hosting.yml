@@ -30,6 +30,17 @@ jobs:
       - name: Unit tests
         run: pnpm run test:search
 
+      - name: E2E tests
+        env:
+          VITE_USE_DEMO_DATA: "true"
+        run: |
+          pnpm run dev -- --host 127.0.0.1 --port 4173 &
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:4173 >/dev/null && break
+            sleep 1
+          done
+          pnpm run cy:run
+
       - name: Build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}

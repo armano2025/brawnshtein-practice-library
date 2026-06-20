@@ -9,6 +9,7 @@
     "preview": "vite preview --configLoader runner",
     "lint": "eslint . --max-warnings 0",
     "test:search": "tsx scripts/testSearch.ts",
+    "cy:run": "cypress run --e2e",
     "seed": "tsx scripts/seedFirestore.ts",
     "seed:dry-run": "tsx scripts/seedFirestore.ts --dry-run"
   },
