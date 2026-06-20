@@ -45,7 +45,7 @@ export function createWorksheetService(repository: WorksheetWriter = worksheetRe
         slug: data.slug?.trim() || `worksheet-${suffix}`,
         subjectId: data.subjectId,
         gradeSlug: data.gradeSlug,
-        trackSlug: data.trackSlug || undefined,
+        ...(data.trackSlug ? { trackSlug: data.trackSlug } : {}),
         topicSlug: data.topicSlug,
         title: data.title.trim(),
         description: data.description.trim(),

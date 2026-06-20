@@ -1,6 +1,15 @@
-/* global cy, describe, it */
+/* global afterEach, cy, describe, it */
 
 describe("Brawnshtein Practice Library administration", () => {
+  let worksheetTitle: string | null = null;
+
+  afterEach(() => {
+    if (worksheetTitle) {
+      cy.task("cleanupWorksheetByTitle", worksheetTitle, { log: false });
+      worksheetTitle = null;
+    }
+  });
+
   it("lets an authorized administrator add an external PDF worksheet", function () {
     cy.env<{ ADMIN_EMAIL?: string; ADMIN_PASSWORD?: string }>(["ADMIN_EMAIL", "ADMIN_PASSWORD"])
       .then(({ ADMIN_EMAIL: adminEmail, ADMIN_PASSWORD: adminPassword }) => {
@@ -9,7 +18,7 @@ describe("Brawnshtein Practice Library administration", () => {
           return;
         }
 
-        const worksheetTitle = `תרגול E2E ${Date.now()}`;
+        worksheetTitle = `תרגול E2E לניקוי ${Date.now()}`;
         cy.visit("/admin");
         cy.get("[data-cy=admin-email]").type(adminEmail, { log: false });
         cy.get("[data-cy=admin-password]").type(adminPassword, { log: false });

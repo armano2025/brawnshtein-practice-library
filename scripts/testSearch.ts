@@ -71,6 +71,7 @@ await testWorksheetService.addWorksheet({
 assert.ok(createdWorksheet);
 assert.equal(createdWorksheet.pdfUrl, "https://brawnshtein-pdfs.pages.dev/grade-7/percentages/sample.pdf");
 assert.equal(createdWorksheet.viewCount, 0);
+assert.equal(Object.hasOwn(createdWorksheet, "trackSlug"), false);
 await assert.rejects(() => testWorksheetService.addWorksheet({
   subjectId: "mathematics",
   gradeSlug: "grade-7",
