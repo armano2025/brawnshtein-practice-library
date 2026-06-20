@@ -1,10 +1,12 @@
 import { mathematicsCategories } from "../data/mathematicsCategories";
 import { mathematicsTopics } from "../data/mathematicsTopics";
+import { getActiveTracksByGradeSlug, getMathematicsTrackBySlug, mathematicsTracks } from "../data/mathematicsTracks";
 import { mathematicsWorksheets } from "../data/mathematicsWorksheets";
 import { demoSubjects } from "../data/subjects";
 import type { Grade } from "../models/Grade";
 import type { Subject } from "../models/Subject";
 import type { Topic } from "../models/Topic";
+import type { Track } from "../models/Track";
 import type { Worksheet } from "../models/Worksheet";
 import type { SearchCatalog } from "../models/Search";
 import { gradeRepository } from "../repositories/firestore/gradeRepository";
@@ -45,6 +47,14 @@ async function getTopicsByGradeSlug(gradeSlug: string): Promise<Topic[]> {
   return activeByOrder(topics);
 }
 
+async function getTracksByGradeSlug(gradeSlug: string): Promise<Track[]> {
+  return getActiveTracksByGradeSlug(gradeSlug);
+}
+
+async function getTrackBySlug(slug: string): Promise<Track | null> {
+  return getMathematicsTrackBySlug(slug) ?? null;
+}
+
 async function getTopicBySlug(slug: string): Promise<Topic | null> {
   if (isDemoDataEnabled) {
     return mathematicsTopics.find((topic) => topic.slug === slug) ?? null;
@@ -78,6 +88,7 @@ function getSearchCatalog(): Promise<SearchCatalog> {
           subjects: activeByOrder(demoSubjects),
           grades: activeByOrder(mathematicsCategories),
           topics: activeByOrder(mathematicsTopics),
+          tracks: activeByOrder(mathematicsTracks),
           worksheets: mathematicsWorksheets.filter((worksheet) => worksheet.isActive),
         };
       }
@@ -93,6 +104,7 @@ function getSearchCatalog(): Promise<SearchCatalog> {
         subjects: activeByOrder(subjects),
         grades: activeByOrder(grades),
         topics: activeByOrder(topics),
+        tracks: activeByOrder(mathematicsTracks),
         worksheets: worksheets.filter((worksheet) => worksheet.isActive),
       };
     })().catch((error: unknown) => {
@@ -109,6 +121,8 @@ export const catalogService = {
   getGrades,
   getGradeBySlug,
   getTopicsByGradeSlug,
+  getTracksByGradeSlug,
+  getTrackBySlug,
   getTopicBySlug,
   getWorksheetsByTopicSlug,
   getWorksheetBySlug,
