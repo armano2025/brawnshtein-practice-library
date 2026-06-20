@@ -3,6 +3,7 @@ export interface Worksheet {
   slug: string;
   subjectId: "mathematics";
   gradeSlug: string;
+  trackSlug?: string;
   topicSlug: string;
   title: string;
   description: string;
@@ -16,4 +17,10 @@ export interface Worksheet {
   createdAt: string;
   updatedAt: string;
   accessLevel: "public";
+}
+
+const EXTERNAL_PDF_URL_PATTERN = /^https:\/\/brawnshtein-pdfs\.pages\.dev\/.+\.pdf$/i;
+
+export function isValidPdfUrl(value: string): boolean {
+  return EXTERNAL_PDF_URL_PATTERN.test(value.trim());
 }

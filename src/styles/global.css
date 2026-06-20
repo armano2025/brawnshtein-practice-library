@@ -20,7 +20,7 @@ html { direction: rtl; scroll-behavior: smooth; }
 
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 
-button, input { font: inherit; }
+button, input, select, textarea { font: inherit; }
 
 a { color: inherit; text-decoration: none; }
 
@@ -244,6 +244,33 @@ a { color: inherit; text-decoration: none; }
 .worksheet-error-state h1 { margin: 18px 0 6px; color: var(--navy-dark); font-size: 36px; }
 .worksheet-error-state p { margin: 0; color: var(--muted); font-size: 17px; }
 
+.admin-login-page, .admin-upload-page { padding-block: 38px 78px; }
+.admin-login-page { min-height: 70vh; display: grid; place-items: center; }
+.admin-card { border: 1px solid var(--border); border-radius: 22px; background: #fff; box-shadow: 0 12px 36px rgba(15, 45, 70, .08); }
+.admin-login-form { width: min(100%, 480px); display: grid; gap: 18px; padding: 25px; }
+.admin-login-form h1, .admin-upload-heading h1 { margin: 5px 0 4px; color: var(--navy-dark); font-size: clamp(30px, 7vw, 43px); }
+.admin-login-form p, .admin-upload-heading p { margin: 0; color: var(--muted); }
+.admin-login-form label, .admin-upload-form label { display: grid; gap: 7px; color: #334155; font-size: 14px; font-weight: 700; }
+.admin-login-form input, .admin-upload-form input, .admin-upload-form select, .admin-upload-form textarea { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 11px; outline: 0; color: #17324d; background: #fff; font-weight: 400; }
+.admin-login-form input:focus, .admin-upload-form input:focus, .admin-upload-form select:focus, .admin-upload-form textarea:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, .2); }
+.admin-login-form button, .admin-save-button, .admin-upload-heading button, .admin-state button { min-height: 45px; padding: 9px 18px; border: 0; border-radius: 11px; color: #fff; background: #2563eb; font-weight: 700; cursor: pointer; }
+.admin-form-error, .field-help-error { color: #b91c1c !important; }
+.admin-state { min-height: 65vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+.admin-state h1 { margin: 0 0 7px; color: var(--navy-dark); }
+.admin-state p { margin: 0 0 20px; color: var(--muted); }
+.admin-upload-heading { display: flex; flex-direction: column; gap: 18px; margin-bottom: 22px; }
+.admin-upload-heading button { align-self: flex-start; color: #475569; background: #fff; border: 1px solid #cbd5e1; }
+.admin-upload-form { padding: 21px; }
+.admin-account { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+.admin-form-grid { display: grid; gap: 17px; }
+.admin-upload-form textarea { resize: vertical; }
+.field-help { color: #64748b; font-size: 12px; font-weight: 400; }
+.admin-save-button { width: 100%; margin-top: 22px; }
+.admin-save-button:disabled { cursor: not-allowed; opacity: .55; }
+.admin-toast { position: fixed; z-index: 30; right: 16px; bottom: 16px; left: 16px; padding: 13px 16px; border-radius: 12px; color: #fff; box-shadow: 0 10px 30px rgba(15, 23, 42, .25); font-weight: 700; }
+.admin-toast-success { background: #047857; }
+.admin-toast-error { background: #b91c1c; }
+
 .placeholder-page { min-height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-block: 64px; text-align: center; }
 .placeholder-icon { width: 50px; height: 50px; display: grid; place-items: center; border-radius: 50%; color: var(--blue); background: #dbeafe; font-size: 24px; }
 .placeholder-page h1 { margin: 18px 0 6px; color: var(--navy-dark); font-size: 38px; }
@@ -273,6 +300,14 @@ a { color: inherit; text-decoration: none; }
   .pdf-viewer-toolbar { flex-direction: row; align-items: center; justify-content: space-between; }
   .pdf-toolbar-actions { display: flex; }
   .pdf-toolbar-actions .worksheet-action { min-width: 125px; }
+  .admin-login-form { padding: 34px; }
+  .admin-upload-heading { flex-direction: row; align-items: center; justify-content: space-between; }
+  .admin-upload-heading button { align-self: auto; }
+  .admin-upload-form { padding: 30px; }
+  .admin-form-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-field-wide { grid-column: 1 / -1; }
+  .admin-save-button { width: auto; min-width: 150px; }
+  .admin-toast { right: auto; left: 24px; width: min(420px, calc(100% - 48px)); }
 }
 
 @media (min-width: 1020px) {
