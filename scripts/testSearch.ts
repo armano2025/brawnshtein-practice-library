@@ -5,6 +5,9 @@ import { mathematicsTracks } from "../src/data/mathematicsTracks";
 import { mathematicsWorksheets } from "../src/data/mathematicsWorksheets";
 import { demoSubjects } from "../src/data/subjects";
 import type { SearchCatalog } from "../src/models/Search";
+import type { Worksheet } from "../src/models/Worksheet";
+import { isValidPdfUrl } from "../src/models/Worksheet";
+import { createWorksheetService } from "../src/services/worksheetService";
 import { getSearchHighlightSegments, normalizeSearchText, searchCatalog } from "../src/utils/searchCatalog";
 
 const catalog: SearchCatalog = {
@@ -41,5 +44,41 @@ assert.equal(new Set(mathematicsTracks.map((track) => track.slug)).size, mathema
 assert.ok(mathematicsTracks.every((track) => track.topicSlugs.length > 0));
 assert.ok(searchCatalog(catalog, "משוואות").some((result) => result.type === "topic"));
 assert.ok(searchCatalog(catalog, "לוח הכפל").some((result) => result.path === "/worksheet/grade-3-multiplication-table"));
+
+assert.equal(isValidPdfUrl("https://brawnshtein-pdfs.pages.dev/grade-7/percentages/sample.pdf"), true);
+assert.equal(isValidPdfUrl("https://brawnshtein-pdfs.pages.dev/grade-7/sample.PDF"), true);
+assert.equal(isValidPdfUrl("https://example.com/sample.pdf"), false);
+assert.equal(isValidPdfUrl("http://brawnshtein-pdfs.pages.dev/sample.pdf"), false);
+
+let createdWorksheet: Worksheet | null = null;
+const testWorksheetService = createWorksheetService({
+  async create(worksheet) {
+    createdWorksheet = worksheet;
+  },
+  async update() {
+    return undefined;
+  },
+});
+await testWorksheetService.addWorksheet({
+  subjectId: "mathematics",
+  gradeSlug: "grade-7",
+  topicSlug: "grade-7-percentages",
+  title: "תרגול אחוזים",
+  description: "תרגול לדוגמה",
+  tags: ["אחוזים", "כיתה ז"],
+  pdfUrl: "https://brawnshtein-pdfs.pages.dev/grade-7/percentages/sample.pdf",
+});
+assert.ok(createdWorksheet);
+assert.equal(createdWorksheet.pdfUrl, "https://brawnshtein-pdfs.pages.dev/grade-7/percentages/sample.pdf");
+assert.equal(createdWorksheet.viewCount, 0);
+await assert.rejects(() => testWorksheetService.addWorksheet({
+  subjectId: "mathematics",
+  gradeSlug: "grade-7",
+  topicSlug: "grade-7-percentages",
+  title: "כתובת לא תקינה",
+  description: "תרגול לדוגמה",
+  tags: [],
+  pdfUrl: "https://example.com/sample.pdf",
+}));
 
 console.log("Search tests passed.");

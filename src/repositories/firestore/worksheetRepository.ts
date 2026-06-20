@@ -20,6 +20,7 @@ function normalizeWorksheet(id: string, data: DocumentData): Worksheet {
     slug: String(data.slug ?? id),
     subjectId: "mathematics",
     gradeSlug: String(data.gradeSlug ?? ""),
+    trackSlug: data.trackSlug ? String(data.trackSlug) : undefined,
     topicSlug: String(data.topicSlug ?? ""),
     title: String(data.title ?? ""),
     description: String(data.description ?? ""),

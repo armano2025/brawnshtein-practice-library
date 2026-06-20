@@ -15,6 +15,8 @@ export function PdfViewer({ pdfUrl, title, onDownload }: PdfViewerProps) {
     );
   }
 
+  const isExternalPdf = pdfUrl.startsWith("https://");
+
   return (
     <section className="pdf-viewer-section" aria-labelledby="pdf-viewer-title">
       <div className="pdf-viewer-toolbar">
@@ -33,12 +35,16 @@ export function PdfViewer({ pdfUrl, title, onDownload }: PdfViewerProps) {
       </div>
 
       <div className="pdf-frame-wrapper">
-        <object className="pdf-frame" data={`${pdfUrl}#view=FitH`} type="application/pdf" aria-label={`תצוגת PDF: ${title}`}>
-          <div className="pdf-browser-fallback">
-            <p>הדפדפן אינו תומך בהצגת PDF בתוך העמוד.</p>
-            <a href={pdfUrl} target="_blank" rel="noreferrer">פתיחת הקובץ בחלון חדש</a>
-          </div>
-        </object>
+        {isExternalPdf ? (
+          <iframe className="pdf-frame" src={`${pdfUrl}#view=FitH`} title={`תצוגת PDF: ${title}`} />
+        ) : (
+          <object className="pdf-frame" data={`${pdfUrl}#view=FitH`} type="application/pdf" aria-label={`תצוגת PDF: ${title}`}>
+            <div className="pdf-browser-fallback">
+              <p>הדפדפן אינו תומך בהצגת PDF בתוך העמוד.</p>
+              <a href={pdfUrl} target="_blank" rel="noreferrer">פתיחת הקובץ בחלון חדש</a>
+            </div>
+          </object>
+        )}
       </div>
     </section>
   );

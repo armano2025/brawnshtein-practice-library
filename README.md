@@ -44,6 +44,7 @@ Hebrew RTL practice-library website built with React, TypeScript, Vite, Firebase
 - `/grade/:id`
 - `/topic/:id`
 - `/worksheet/:id`
+- `/admin` (Firebase Auth and Firestore administrator allowlist required)
 
 ## Firebase and Firestore setup
 
@@ -56,7 +57,27 @@ The Firebase configuration lives in `src/lib/firebase.ts`. Catalog reads use fou
 
 Use each entity's `id` as its Firestore document ID. Relations use `subjectId`, `gradeSlug`, and `topicSlug`. Create the collections in the Firebase console and copy the matching documents from the local demo data files. Firestore timestamps are supported for worksheet `createdAt` and `updatedAt` fields.
 
-The included security rules allow public reads for the catalog collections and deny all client writes. Authentication, administration, analytics, and client-side counter updates are intentionally not connected yet.
+The included security rules allow public catalog reads. Worksheet creation and updates require Firebase Authentication and an administrator UID listed in the `config/admins` document. Deletes remain blocked.
+
+## Administrator setup
+
+The `/admin` route uses Firebase Email/Password Authentication. Enable that provider in Firebase Console, create an administrator account, and create this Firestore document manually:
+
+```text
+Collection: config
+Document: admins
+Field: uids (array of strings)
+```
+
+Add the administrator's Firebase Auth UID to `uids`. Never store passwords, service-account keys, or administrator credentials in the repository. Deploy the reviewed Firestore rules separately before attempting client writes.
+
+The add-worksheet form accepts only direct PDF URLs matching:
+
+```text
+https://brawnshtein-pdfs.pages.dev/{path}/{file-name}.pdf
+```
+
+The URL is stored in the worksheet document's `pdfUrl` field. Public worksheet pages embed HTTPS URLs responsively and use the same direct URL for opening and downloading the file.
 
 ## One-time Firestore seed
 
