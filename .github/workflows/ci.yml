@@ -32,16 +32,37 @@ jobs:
       - name: Unit tests
         run: pnpm test:search
 
-      - name: E2E tests
-        env:
-          VITE_USE_DEMO_DATA: "true"
-        run: |
-          pnpm run dev -- --host 127.0.0.1 --port 4173 &
-          for attempt in {1..30}; do
-            curl --fail --silent http://127.0.0.1:4173 >/dev/null && break
-            sleep 1
-          done
-          pnpm run cy:run
+      - name: Install Cypress binary
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: pnpm install --frozen-lockfile
+          runTests: false
 
       - name: Build
+        env:
+          VITE_USE_DEMO_DATA: "true"
         run: pnpm build
+
+      - name: E2E tests
+        env:
+          CYPRESS_ADMIN_EMAIL: ${{ secrets.CYPRESS_ADMIN_EMAIL }}
+          CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
+        run: |
+          pnpm exec vite preview --host 127.0.0.1 --port 4173 &
+          server_ready=false
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173 >/dev/null; then
+              server_ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$server_ready" != "true" ]; then
+            echo "Vite preview did not start on port 4173"
+            exit 1
+          fi
+          if [ -z "$CYPRESS_ADMIN_EMAIL" ] || [ -z "$CYPRESS_ADMIN_PASSWORD" ]; then
+            pnpm run cy:run --spec "cypress/e2e/navigation.cy.ts"
+          else
+            pnpm run cy:run
+          fi
