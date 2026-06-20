@@ -32,5 +32,86 @@ jobs:
       - name: Unit tests
         run: pnpm test:search
 
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Cypress binary
+        run: pnpm exec cypress install
+
+      - name: Verify Cypress binary
+        run: pnpm exec cypress verify
+
+      - name: Select safe E2E mode
+        id: e2e-mode
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          CYPRESS_ADMIN_EMAIL: ${{ secrets.CYPRESS_ADMIN_EMAIL }}
+          CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] \
+            && [ -n "$VITE_FIREBASE_API_KEY" ] \
+            && [ -n "$VITE_FIREBASE_AUTH_DOMAIN" ] \
+            && [ -n "$VITE_FIREBASE_PROJECT_ID" ] \
+            && [ -n "$VITE_FIREBASE_STORAGE_BUCKET" ] \
+            && [ -n "$VITE_FIREBASE_MESSAGING_SENDER_ID" ] \
+            && [ -n "$VITE_FIREBASE_APP_ID" ] \
+            && [ -n "$CYPRESS_ADMIN_EMAIL" ] \
+            && [ -n "$CYPRESS_ADMIN_PASSWORD" ]; then
+            echo "run_admin=true" >> "$GITHUB_OUTPUT"
+            echo "use_demo_data=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_admin=false" >> "$GITHUB_OUTPUT"
+            echo "use_demo_data=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Admin E2E skipped: a pull_request event and all required repository secrets are required."
+          fi
+
       - name: Build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_USE_DEMO_DATA: ${{ steps.e2e-mode.outputs.use_demo_data }}
         run: pnpm build
+
+      - name: E2E tests
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          CYPRESS_ADMIN_EMAIL: ${{ secrets.CYPRESS_ADMIN_EMAIL }}
+          CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
+          RUN_ADMIN_E2E: ${{ steps.e2e-mode.outputs.run_admin }}
+        run: |
+          pnpm exec vite preview --host 127.0.0.1 --port 4173 &
+          server_ready=false
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173 >/dev/null; then
+              server_ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$server_ready" != "true" ]; then
+            echo "Vite preview did not start on port 4173"
+            exit 1
+          fi
+          if [ "$RUN_ADMIN_E2E" = "true" ]; then
+            pnpm run cy:run
+          else
+            echo "Admin E2E skipped safely; running public navigation tests only."
+            pnpm run cy:run --spec "cypress/e2e/navigation.cy.ts"
+          fi
