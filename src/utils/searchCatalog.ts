@@ -86,6 +86,17 @@ export function searchCatalog(catalog: SearchCatalog, rawQuery: string): SearchR
     path: `/grade/${grade.slug}`,
   }, `${grade.title} ${grade.shortLabel}`));
 
+  catalog.tracks.filter((track) => track.isActive).forEach((track) => {
+    const grade = catalog.grades.find((item) => item.slug === track.gradeSlug);
+    addResult({
+      id: track.id,
+      type: "track",
+      title: track.name,
+      description: grade ? `${grade.title} · ${track.description}` : track.description,
+      path: `/grade/${track.gradeSlug}/track/${track.slug}`,
+    }, `${track.name} ${track.description} ${grade?.title ?? ""}`);
+  });
+
   catalog.topics.filter((topic) => topic.isActive).forEach((topic) => {
     const grade = catalog.grades.find((item) => item.slug === topic.gradeSlug);
     addResult({

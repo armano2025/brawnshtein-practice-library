@@ -14,6 +14,21 @@ async function getBreadcrumbs(pathname: string): Promise<BreadcrumbItem[]> {
     return [home, { label: "מתמטיקה" }];
   }
 
+  const trackMatch = matchPath("/grade/:id/track/:trackId", pathname);
+  if (trackMatch) {
+    const [category, track] = await Promise.all([
+      trackMatch.params.id ? catalogService.getGradeBySlug(trackMatch.params.id) : null,
+      trackMatch.params.trackId ? catalogService.getTrackBySlug(trackMatch.params.trackId) : null,
+    ]);
+
+    return [
+      home,
+      { label: "מתמטיקה", path: "/mathematics" },
+      { label: category?.title ?? "כיתה", path: category ? `/grade/${category.slug}` : undefined },
+      { label: track?.name ?? "מסלול יחידות" },
+    ];
+  }
+
   const gradeMatch = matchPath("/grade/:id", pathname);
   if (gradeMatch) {
     const category = gradeMatch.params.id

@@ -25,4 +25,13 @@ describe("Brawnshtein Practice Library navigation", () => {
     cy.get("#practice-search").should("be.visible");
     cy.contains("a", "מתמטיקה").should("be.visible");
   });
+
+  it("opens a five-unit track for grade 10", () => {
+    cy.visit("/grade/grade-10");
+    cy.contains("h1", "כיתה י׳").should("be.visible");
+    cy.contains("a", "5 יח״ל").click();
+    cy.location("pathname").should("equal", "/grade/grade-10/track/grade-10-5-units");
+    cy.contains("h1", "כיתה י׳ — 5 יח״ל").should("be.visible");
+    cy.contains("a", "חדו״א").should("be.visible");
+  });
 });

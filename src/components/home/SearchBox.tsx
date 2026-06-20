@@ -7,6 +7,7 @@ import { getSearchHighlightSegments, searchCatalog } from "../../utils/searchCat
 const resultTypeLabels: Record<SearchResultType, string> = {
   subject: "מקצוע",
   grade: "כיתה או מסלול",
+  track: "מסלול יחידות",
   topic: "נושא",
   worksheet: "תרגול",
 };
